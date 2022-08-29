@@ -9,12 +9,11 @@ use Illuminate\Validation\Rule;
 class ListingController extends Controller
 {
     // Show all listings
-    public function index(Request $request)
+    public function index()
     {
 
         return view('listings.index', [
-            'heading' => 'Latest Listings',
-            'listings' => Listing::latest()->filter(request(['tag', 'search']))->get(),
+            'listings' => Listing::latest()->filter(request(['tag', 'search']))->paginate(6),
         ]);
     }
 
@@ -44,6 +43,10 @@ class ListingController extends Controller
             'tags' => 'required',
             'description' => 'required',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $formFields['logo'] = $request->file('logo')->store('logos', 'public');
+        }
 
         Listing::create($formFields);
 
