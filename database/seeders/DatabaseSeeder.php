@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use App\Models\Listing;
 use Illuminate\Database\Seeder;
 
@@ -15,9 +16,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        \App\Models\User::factory(5)->create();
+        // \App\Models\User::factory(5)->create();
 
-        Listing::factory(6)->create();
+        $user = User::factory()->create([
+            'name' => 'Stefano Dolci',
+            'email' => 'ste@gmail.com',
+
+        ]);
+
+        Listing::factory(6)->create([
+            'user_id' => $user->id
+        ]);
 
         // Listing::create(
         //     [
@@ -39,7 +48,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'email2@email.com',
         //     'website' => 'https://www.starkindustries.com',
         //     'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsam minima et illo reprehenderit quas possimus voluptas repudiandae cum expedita, eveniet aliquid, quam illum quaerat consequatur! Expedita ab consectetur tenetur delensiti?'
-          
+
         // ]);
     }
 }
