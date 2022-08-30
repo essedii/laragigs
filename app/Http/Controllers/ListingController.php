@@ -11,13 +11,12 @@ class ListingController extends Controller
     // Show all listings
     public function index()
     {
-
         return view('listings.index', [
-            'listings' => Listing::latest()->filter(request(['tag', 'search']))->paginate(6),
+            'listings' => Listing::latest()->filter(request(['tag', 'search']))->paginate(6)
         ]);
     }
 
-    // Show Single Listing
+    //Show single listing
     public function show(Listing $listing)
     {
         return view('listings.show', [
@@ -41,15 +40,16 @@ class ListingController extends Controller
             'website' => 'required',
             'email' => ['required', 'email'],
             'tags' => 'required',
-            'description' => 'required',
+            'description' => 'required'
         ]);
 
         if ($request->hasFile('logo')) {
             $formFields['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
-        Listing::create($formFields);
+        $formFields['user_id'] = auth()->id();
 
+        Listing::create($formFields);
 
         return redirect('/')->with('message', 'Listing created successfully!');
     }
@@ -57,21 +57,25 @@ class ListingController extends Controller
     // Show Edit Form
     public function edit(Listing $listing)
     {
-
         return view('listings.edit', ['listing' => $listing]);
     }
 
-    // Store Listing Data
+    // Update Listing Data
     public function update(Request $request, Listing $listing)
     {
+        // Make sure logged in user is owner
+        if ($listing->user_id != auth()->id()) {
+            abort(403, 'Unauthorized Action');
+        }
+
         $formFields = $request->validate([
             'title' => 'required',
-            'company' => ['required',],
+            'company' => ['required'],
             'location' => 'required',
             'website' => 'required',
             'email' => ['required', 'email'],
             'tags' => 'required',
-            'description' => 'required',
+            'description' => 'required'
         ]);
 
         if ($request->hasFile('logo')) {
@@ -80,14 +84,24 @@ class ListingController extends Controller
 
         $listing->update($formFields);
 
-
-        return back()->with('message', 'Listing update successfully!');
+        return back()->with('message', 'Listing updated successfully!');
     }
 
-    //Delete Listing
+    // Delete Listing
     public function destroy(Listing $listing)
     {
+        // Make sure logged in user is owner
+        if ($listing->user_id != auth()->id()) {
+            abort(403, 'Unauthorized Action');
+        }
+
         $listing->delete();
-        return redirect('/')->with('message', 'Listing deleted Succesfully!');
+        return redirect('/')->with('message', 'Listing deleted successfully');
+    }
+
+    // Manage Listings
+    public function manage()
+    {
+        return view('listings.manage', ['listings' => request()->user()->listings()->get()]);
     }
 }
